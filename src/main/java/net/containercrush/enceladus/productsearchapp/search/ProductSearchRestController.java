@@ -25,12 +25,22 @@ public class ProductSearchRestController {
         List<Product> entities = new ArrayList<Product>();
         Product product = new Product() ;
         product.setName("Zodiac Linen Blue");
+        product.setProductMaterial("Linen");
+        product.setProductType("Shirt");
+        product.setProductColour("Blue");
         entities.add(product);
+        
+        product = new Product() ;
+        product.setName("Grey Cotton Trouser");
+        product.setProductMaterial("Cotton");
+        product.setProductType("Touser");
+        product.setProductColour("Grey");
+        entities.add(product);
+        
         
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
     }
 
-
-}
+    }
 
 
