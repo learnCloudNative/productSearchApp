@@ -5,6 +5,7 @@ public class ProductFamily {
 
    private String familyID ;
    private String familyName ;
+   private String teamName ;
 
     public String getFamilyID() {
         return familyID;
@@ -20,6 +21,14 @@ public class ProductFamily {
 
     public void setFamilyName(String familyName) {
         this.familyName = familyName;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
    

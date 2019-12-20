@@ -34,6 +34,7 @@ public class ProductSearchRestController {
 
         System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
         System.out.println("Received Request for Product Families...") ;
+        System.out.println("Received Request for Product Families (yes it refreshed image)...") ;
 
         Connection con = null ;
         Statement stmt = null ;
@@ -50,6 +51,7 @@ public class ProductSearchRestController {
                 ProductFamily productFamily = new ProductFamily() ;
                 productFamily.setFamilyID(rs.getString("family"));
                 productFamily.setFamilyName(rs.getString("family_name"));
+                productFamily.setTeamName("Enceladus") ;
                 entities.add(productFamily);
 
 			}
