@@ -39,7 +39,7 @@ public class ProductSearchRestController {
 
         try {
 
-            String sql = "select distinct(family), family_name from xxibm_product_catalogue";
+            String sql = "select distinct(family), family_name from XXIBM_PRODUCT_CATALOGUE";
             con = dataSource.getConnection();
             System.out.println("Database connection obtained : " + con) ;
             stmt = con.createStatement();
