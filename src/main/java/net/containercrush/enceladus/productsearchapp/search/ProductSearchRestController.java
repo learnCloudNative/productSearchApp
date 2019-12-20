@@ -33,6 +33,7 @@ public class ProductSearchRestController {
         List<ProductFamily> entities = new ArrayList<ProductFamily>();
 
         System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Families...") ;
 
         Connection con = null ;
         Statement stmt = null ;
