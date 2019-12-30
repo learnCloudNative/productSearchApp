@@ -95,7 +95,7 @@ public class ProductSearchRestController {
         PreparedStatement prstmt = null;
         try {
 
-            String sql = "select   distinct(commodity_name), commodity ,class, class_name, family, family_name from xxibm_product_catalogue";
+            String sql = "select   distinct(commodity_name), commodity ,class, class_name, family, family_name from XXIBM_PRODUCT_CATALOGUE";
             con = dataSource.getConnection();
             System.out.println("Database connection obtained : " + con) ;
             //stmt = con.createStatement();
@@ -152,7 +152,7 @@ public class ProductSearchRestController {
 
         try {
 
-            String sql = "select  distinct(commodity_name), commodity, class, class_name, family, family_name from xxibm_product_catalogue where class = ?";
+            String sql = "select  distinct(commodity_name), commodity, class, class_name, family, family_name from XXIBM_PRODUCT_CATALOGUE where class = ?";
             con = dataSource.getConnection();
             System.out.println("Database connection obtained : " + con) ;
             //stmt = con.createStatement();
@@ -208,7 +208,7 @@ public class ProductSearchRestController {
 
         try {
 
-            String sql = "select  distinct(commodity_name), commodity, class, class_name, family, family_name from xxibm_product_catalogue where family = ?";
+            String sql = "select  distinct(commodity_name), commodity, class, class_name, family, family_name from XXIBM_PRODUCT_CATALOGUE where family = ?";
             con = dataSource.getConnection();
             System.out.println("Database connection obtained : " + con) ;
             //stmt = con.createStatement();
