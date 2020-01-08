@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -81,7 +83,7 @@ public class ProductSearchRestController {
     }
 	
 	 
-    @GetMapping(path = "/commodities", produces = MediaType.APPLICATION_JSON_VALUE)
+    /*@GetMapping(path = "/commodities", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getCommodities() {
         // Get data from service layer into entityList.
 
@@ -134,7 +136,127 @@ public class ProductSearchRestController {
        
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
     }
+*/
+    
+    
+    @GetMapping(path = "/commodities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getCommodities() {
+        // Get data from service layer into entityList.
 
+        List<ProductCommodity> entities = new ArrayList<ProductCommodity>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities...") ;
+        System.out.println("Received Request for Product Commodities (yes it refreshed image)...") ;
+        Set<String> uniqueCommodity= new HashSet<String>();
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+        ResultSet rs =null;
+        ResultSet rs1 = null;
+        try {
+
+                       
+            String sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
+            		+ "pp.discount,pp.in_stock,psk.description," + 
+            		"psk.sku_attribute_value1,psk.sku_attribute_value2 " + 
+            		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
+            		"XXIBM_PRODUCT_PRICING pp where pc.commodity=psk.catalogue_category and " + 
+            		"psk.item_number=pp.item_number";
+            
+            con = dataSource.getConnection();
+            System.out.println("Database connection obtained : " + con) ;
+            prstmt=con.prepareStatement(sql1);
+            rs = prstmt.executeQuery();
+            while(rs.next()){
+                ProductCommodity productCommodity = new ProductCommodity() ;
+                uniqueCommodity.add(rs.getString("commodity"));
+                               
+                
+                productCommodity.setCommodity(rs.getString("commodity"));
+                productCommodity.setCommodityName(rs.getString("commodity_name"));
+                productCommodity.setClassID(rs.getString("class"));
+                productCommodity.setClassName(rs.getString("class_name"));
+                productCommodity.setFamily(rs.getString("family"));
+                productCommodity.setFamilyName(rs.getString("family_name"));
+                productCommodity.setCommodityColour(rs.getString("sku_attribute_value2"));
+                productCommodity.setCommodityPrice(rs.getString("list_price"));
+                productCommodity.setCommoditySize(rs.getString("sku_attribute_value1"));
+                productCommodity.setCommodityDiscount(rs.getString("discount"));
+                productCommodity.setCommodityDescription(rs.getString("description"));
+                productCommodity.setCommodityInStock(rs.getString("in_stock"));
+                entities.add(productCommodity);
+
+			}
+            System.out.println("After first query: "+entities.size());
+            
+          
+            int count=1;
+            String queryPart="";
+            for (String var : uniqueCommodity) 
+            { 
+            	if(count==uniqueCommodity.size())
+            	{
+            		queryPart+= "'" + var + "'";
+            	}
+            	else
+            	{
+            		queryPart+= "'" + var + "',";
+            	}
+                count++;
+            }
+            
+            
+            String sql = "select   distinct(commodity_name), commodity ,class, class_name, family, family_name from XXIBM_PRODUCT_CATALOGUE where commodity"
+            		+ " not in ("+queryPart+")";
+            
+            
+            prstmt=con.prepareStatement(sql);
+            rs1 = prstmt.executeQuery();
+            System.out.println(queryPart);
+            System.out.println(sql);
+            while(rs1.next()){
+                ProductCommodity productCommodity = new ProductCommodity() ;
+                uniqueCommodity.add(rs1.getString("commodity"));
+                productCommodity.setCommodity(rs1.getString("commodity"));
+                productCommodity.setCommodityName(rs1.getString("commodity_name"));
+                productCommodity.setClassID(rs1.getString("class"));
+                productCommodity.setClassName(rs1.getString("class_name"));
+                productCommodity.setFamily(rs1.getString("family"));
+                productCommodity.setFamilyName(rs1.getString("family_name"));
+                productCommodity.setCommodityColour("NA");
+                productCommodity.setCommodityPrice("NA");
+                productCommodity.setCommoditySize("NA");
+                productCommodity.setCommodityDiscount("NA");
+                productCommodity.setCommodityDescription("NA");
+                productCommodity.setCommodityInStock("NA");
+                entities.add(productCommodity);
+
+			}
+            System.out.println("After second query: "+entities.size());
+            
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	prstmt.close();
+                con.close(); 
+                rs.close();
+                rs1.close();
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
     
     
     @GetMapping(path = "/commodities/commoditybyClassID/{classID}", produces = MediaType.APPLICATION_JSON_VALUE)
