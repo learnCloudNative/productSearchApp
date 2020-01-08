@@ -10,7 +10,12 @@ public class ProductCommodity {
    private String family ;
    private String familyName ;
    private String teamName ;
-  
+   private String commoditySize ;
+   private String commodityColour ;
+   private String commodityPrice ;
+   private String commodityDescription ;
+   private String commodityDiscount ;
+   private String commodityInStock ;
    
    
 public String getCommodity() {
@@ -54,6 +59,42 @@ public String getClassID() {
 }
 public void setClassID(String classID) {
 	this.classID = classID;
+}
+public String getCommoditySize() {
+	return commoditySize;
+}
+public void setCommoditySize(String commoditySize) {
+	this.commoditySize = commoditySize;
+}
+public String getCommodityColour() {
+	return commodityColour;
+}
+public void setCommodityColour(String commodityColour) {
+	this.commodityColour = commodityColour;
+}
+public String getCommodityPrice() {
+	return commodityPrice;
+}
+public void setCommodityPrice(String commodityPrice) {
+	this.commodityPrice = commodityPrice;
+}
+public String getCommodityDescription() {
+	return commodityDescription;
+}
+public void setCommodityDescription(String commodityDescription) {
+	this.commodityDescription = commodityDescription;
+}
+public String getCommodityDiscount() {
+	return commodityDiscount;
+}
+public void setCommodityDiscount(String commodityDiscount) {
+	this.commodityDiscount = commodityDiscount;
+}
+public String getCommodityInStock() {
+	return commodityInStock;
+}
+public void setCommodityInStock(String commodityInStock) {
+	this.commodityInStock = commodityInStock;
 }
   
    
