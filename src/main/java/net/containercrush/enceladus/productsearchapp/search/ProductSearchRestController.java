@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.containercrush.enceladus.productsearchapp.model.Product;
+import net.containercrush.enceladus.productsearchapp.model.ProductClass;
 import net.containercrush.enceladus.productsearchapp.model.ProductCommodity;
 import net.containercrush.enceladus.productsearchapp.model.ProductFamily;
 @CrossOrigin
@@ -57,7 +58,6 @@ public class ProductSearchRestController {
                 ProductFamily productFamily = new ProductFamily() ;
                 productFamily.setFamilyID(rs.getString("family"));
                 productFamily.setFamilyName(rs.getString("family_name"));
-                productFamily.setTeamName("Enceladus") ;
                 entities.add(productFamily);
 
 			}
@@ -371,6 +371,111 @@ public class ProductSearchRestController {
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
     }
 
+    
+    
+    @GetMapping(path = "/commodities/familyBySegmentId/{segmentID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getFamilyBySegmentId(@PathVariable String segmentID) {
+        // Get data from service layer into entityList.
+
+        List<ProductFamily> entities = new ArrayList<ProductFamily>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities by Class ID...") ;
+        System.out.println("Received Request for Product Commodities by Class ID (yes it refreshed image)...") ;
+
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+
+        try {
+
+            String sql = "select  distinct(family), family_name from XXIBM_PRODUCT_CATALOGUE where segment= ? ";
+            con = dataSource.getConnection();
+            System.out.println("Database connection obtained : " + con) ;
+            //stmt = con.createStatement();
+            prstmt=con.prepareStatement(sql);
+            prstmt.setString(1, segmentID);
+            ResultSet rs = prstmt.executeQuery();
+            while(rs.next()){
+                
+                ProductFamily productFamily = new ProductFamily() ;
+                productFamily.setFamilyID(rs.getString("family"));
+                productFamily.setFamilyName(rs.getString("family_name"));
+                entities.add(productFamily);
+
+			}
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	prstmt.close();
+                con.close(); 
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
+    
+    
+    @GetMapping(path = "/commodities/classByFamilyId/{familyID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getClassByFamilyId(@PathVariable String familyID) {
+        // Get data from service layer into entityList.
+
+        List<ProductClass> entities = new ArrayList<ProductClass>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities by Class ID...") ;
+        System.out.println("Received Request for Product Commodities by Class ID (yes it refreshed image)...") ;
+
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+
+        try {
+
+            String sql = "select  distinct(class), class_name from XXIBM_PRODUCT_CATALOGUE where family= ? ";
+            con = dataSource.getConnection();
+            System.out.println("Database connection obtained : " + con) ;
+            //stmt = con.createStatement();
+            prstmt=con.prepareStatement(sql);
+            prstmt.setString(1, familyID);
+            ResultSet rs = prstmt.executeQuery();
+            while(rs.next()){
+                
+                ProductClass productClass = new ProductClass() ;
+                productClass.setClassID(rs.getString("class"));
+                productClass.setClassName(rs.getString("class_name"));
+                entities.add(productClass);
+
+			}
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	prstmt.close();
+                con.close(); 
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
     
 
 }
