@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -258,7 +259,7 @@ public class ProductSearchRestController {
     }
     
     
-    
+ /*   
     @GetMapping(path = "/commodities/commoditybyClassID/{classID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getCommoditiesByClassID(@PathVariable String classID) {
         // Get data from service layer into entityList.
@@ -313,9 +314,138 @@ public class ProductSearchRestController {
 
        
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
-    }
+    }*/
+    
+    
+    
+    @GetMapping(path = "/commodities/commoditybyClassID/{classID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getCommoditiesByClassID(@PathVariable String classID) {
+        // Get data from service layer into entityList.
 
-    @GetMapping(path = "/commodities/commoditybyFamilyID/{familyID}", produces = MediaType.APPLICATION_JSON_VALUE)
+        List<ProductCommodity> entities = new ArrayList<ProductCommodity>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities...") ;
+        System.out.println("Received Request for Product Commodities (yes it refreshed image)...") ;
+        Set<String> uniqueCommodity= new HashSet<String>();
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+        ResultSet rs =null;
+        ResultSet rs1 = null;
+        HashMap<String,ProductCommodity> hm=new HashMap<String,ProductCommodity>();
+        try {
+
+        	
+        	 String sql = "select   distinct(commodity_name), commodity ,class, class_name, family, family_name "
+             		+ "from XXIBM_PRODUCT_CATALOGUE where class = ?";
+             
+        	 con = dataSource.getConnection();
+             System.out.println("Database connection obtained : " + con) ;
+             prstmt=con.prepareStatement(sql);
+             prstmt.setString(1, classID);
+             rs1 = prstmt.executeQuery();
+             System.out.println(sql);
+             while(rs1.next()){
+                 ProductCommodity productCommodity = new ProductCommodity() ;
+                 uniqueCommodity.add(rs1.getString("commodity"));
+                 productCommodity.setCommodity(rs1.getString("commodity"));
+                 productCommodity.setCommodityName(rs1.getString("commodity_name"));
+                 productCommodity.setClassID(rs1.getString("class"));
+                 productCommodity.setClassName(rs1.getString("class_name"));
+                 productCommodity.setFamily(rs1.getString("family"));
+                 productCommodity.setFamilyName(rs1.getString("family_name"));
+                 productCommodity.setCommodityColour("NA");
+                 productCommodity.setCommodityPrice("NA");
+                 productCommodity.setCommoditySize("NA");
+                 productCommodity.setCommodityDiscount("NA");
+                 productCommodity.setCommodityDescription("NA");
+                 productCommodity.setCommodityInStock("NA");
+                 hm.put(productCommodity.getCommodity(), productCommodity);
+                 entities.add(productCommodity);
+
+ 			}
+             System.out.println("After first query: "+entities.size());
+        	
+        	
+             int count=1;
+             String queryPart="";
+             for (String var : uniqueCommodity) 
+             { 
+             	if(count==uniqueCommodity.size())
+             	{
+             		queryPart+= "'" + var + "'";
+             	}
+             	else
+             	{
+             		queryPart+= "'" + var + "',";
+             	}
+                 count++;
+             }
+             
+             con.close();
+          	prstmt.close();
+        	
+                       
+            String sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
+            		+ "pp.discount,pp.in_stock,psk.description," + 
+            		"psk.sku_attribute_value1,psk.sku_attribute_value2 " + 
+            		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
+            		"XXIBM_PRODUCT_PRICING pp where pc.commodity=psk.catalogue_category and " + 
+            		"psk.item_number=pp.item_number and pc.commodity in ("+ queryPart+")";
+            
+            con = dataSource.getConnection();
+            System.out.println("Database connection obtained : " + con) ;
+            prstmt=con.prepareStatement(sql1);
+            rs = prstmt.executeQuery();
+            while(rs.next()){
+                ProductCommodity productCommodity = new ProductCommodity() ;
+                productCommodity=hm.get(rs.getString("commodity"));
+               
+                if(productCommodity!=null)
+                {
+                	System.out.println("Inside productCommodity loop");
+                	 entities.remove(productCommodity);
+                	 System.out.println("sku_attribute_value2: "+rs.getString("sku_attribute_value2"));
+                	 productCommodity.setCommodityColour(rs.getString("sku_attribute_value2"));
+                	 System.out.println("list_price: "+rs.getString("list_price"));
+                     productCommodity.setCommodityPrice(rs.getString("list_price"));
+                     System.out.println("sku_attribute_value1: "+rs.getString("sku_attribute_value1"));
+                     productCommodity.setCommoditySize(rs.getString("sku_attribute_value1"));
+                     productCommodity.setCommodityDiscount(rs.getString("discount"));
+                     productCommodity.setCommodityDescription(rs.getString("description"));
+                     productCommodity.setCommodityInStock(rs.getString("in_stock"));
+                     entities.add(productCommodity);
+                }
+                
+			}
+            System.out.println("After second query: "+entities.size());
+            
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	prstmt.close();
+                con.close(); 
+                rs.close();
+                rs1.close();
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
+    
+
+    /*@GetMapping(path = "/commodities/commoditybyFamilyID/{familyID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getCommoditiesByFamilyID(@PathVariable String familyID) {
         // Get data from service layer into entityList.
 
@@ -369,7 +499,131 @@ public class ProductSearchRestController {
 
        
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }*/
+    
+    
+    
+    @GetMapping(path = "/commodities/commoditybyFamilyID/{familyID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getCommoditiesByFamilyID(@PathVariable String familyID) {
+        // Get data from service layer into entityList.
+
+    	 List<ProductCommodity> entities = new ArrayList<ProductCommodity>();
+
+         System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+         System.out.println("Received Request for Product Commodities...") ;
+         System.out.println("Received Request for Product Commodities (yes it refreshed image)...") ;
+         Set<String> uniqueCommodity= new HashSet<String>();
+         Connection con = null ;
+         PreparedStatement prstmt = null;
+         ResultSet rs =null;
+         ResultSet rs1 = null;
+         HashMap<String,ProductCommodity> hm=new HashMap<String,ProductCommodity>();
+         try {
+
+         	
+         	 String sql = "select   distinct(commodity_name), commodity ,class, class_name, family, family_name "
+              		+ "from XXIBM_PRODUCT_CATALOGUE where family = ?";
+              
+         	 con = dataSource.getConnection();
+              System.out.println("Database connection obtained : " + con) ;
+              prstmt=con.prepareStatement(sql);
+              prstmt.setString(1, familyID);
+              rs1 = prstmt.executeQuery();
+              System.out.println(sql);
+              while(rs1.next()){
+                  ProductCommodity productCommodity = new ProductCommodity() ;
+                  uniqueCommodity.add(rs1.getString("commodity"));
+                  productCommodity.setCommodity(rs1.getString("commodity"));
+                  productCommodity.setCommodityName(rs1.getString("commodity_name"));
+                  productCommodity.setClassID(rs1.getString("class"));
+                  productCommodity.setClassName(rs1.getString("class_name"));
+                  productCommodity.setFamily(rs1.getString("family"));
+                  productCommodity.setFamilyName(rs1.getString("family_name"));
+                  productCommodity.setCommodityColour("NA");
+                  productCommodity.setCommodityPrice("NA");
+                  productCommodity.setCommoditySize("NA");
+                  productCommodity.setCommodityDiscount("NA");
+                  productCommodity.setCommodityDescription("NA");
+                  productCommodity.setCommodityInStock("NA");
+                  hm.put(productCommodity.getCommodity(), productCommodity);
+                  entities.add(productCommodity);
+
+  			}
+              System.out.println("After first query: "+entities.size());
+         	
+         	
+              int count=1;
+              String queryPart="";
+              for (String var : uniqueCommodity) 
+              { 
+              	if(count==uniqueCommodity.size())
+              	{
+              		queryPart+= "'" + var + "'";
+              	}
+              	else
+              	{
+              		queryPart+= "'" + var + "',";
+              	}
+                  count++;
+              }
+              
+         	
+         	con.close();
+         	prstmt.close();
+                        
+             String sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
+             		+ "pp.discount,pp.in_stock,psk.description," + 
+             		"psk.sku_attribute_value1,psk.sku_attribute_value2 " + 
+             		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
+             		"XXIBM_PRODUCT_PRICING pp where pc.commodity=psk.catalogue_category and " + 
+             		"psk.item_number=pp.item_number and pc.commodity in ("+ queryPart+")";
+             
+             con = dataSource.getConnection();
+             System.out.println("Database connection obtained : " + con) ;
+             prstmt=con.prepareStatement(sql1);
+             rs = prstmt.executeQuery();
+             while(rs.next()){
+                 ProductCommodity productCommodity = new ProductCommodity() ;
+                 productCommodity=hm.get(rs.getString("commodity"));
+                
+                 if(productCommodity!=null)
+                 {
+                 	 entities.remove(productCommodity);
+                 	 productCommodity.setCommodityColour(rs.getString("sku_attribute_value2"));
+                      productCommodity.setCommodityPrice(rs.getString("list_price"));
+                      productCommodity.setCommoditySize(rs.getString("sku_attribute_value1"));
+                      productCommodity.setCommodityDiscount(rs.getString("discount"));
+                      productCommodity.setCommodityDescription(rs.getString("description"));
+                      productCommodity.setCommodityInStock(rs.getString("in_stock"));
+                      entities.add(productCommodity);
+                 }
+                 
+ 			}
+             System.out.println("After second query: "+entities.size());
+            
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	prstmt.close();
+                con.close(); 
+                rs.close();
+                rs1.close();
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
     }
+    
 
     
     
@@ -441,7 +695,7 @@ public class ProductSearchRestController {
 
         try {
 
-            String sql = "select  distinct(class), class_name from XXIBM_PRODUCT_CATALOGUE where family= ? ";
+            String sql = "select  distinct(class), class_name, family,family_name from XXIBM_PRODUCT_CATALOGUE where family= ? ";
             con = dataSource.getConnection();
             System.out.println("Database connection obtained : " + con) ;
             //stmt = con.createStatement();
@@ -453,6 +707,8 @@ public class ProductSearchRestController {
                 ProductClass productClass = new ProductClass() ;
                 productClass.setClassID(rs.getString("class"));
                 productClass.setClassName(rs.getString("class_name"));
+                productClass.setFamily(rs.getString("family"));
+                productClass.setFamilyName(rs.getString("family_name"));
                 entities.add(productClass);
 
 			}
