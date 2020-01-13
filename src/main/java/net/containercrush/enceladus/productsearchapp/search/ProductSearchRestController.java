@@ -922,4 +922,159 @@ public class ProductSearchRestController {
     }
     
 
+    @GetMapping(path = "/commodities/itemByFilter/{filter}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getItemByFilter(@PathVariable String filter) {
+        // Get data from service layer into entityList.
+
+        List<ProductCommodity> entities = new ArrayList<ProductCommodity>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities...") ;
+        System.out.println("Received Request for Product Commodities (yes it refreshed image)...") ;
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+        ResultSet rs =null;
+        ResultSet rs1 = null;
+        Set<String> uniqueCommodity_colour= new HashSet<String>();
+        Set<String> uniqueCommodity_size= new HashSet<String>();
+        Set<String> uniqueCommodity_brand= new HashSet<String>();
+        try {
+        	
+        	  String queryPart_color="";
+              String queryPart_size="";
+              String queryPart_brand="";
+              
+              
+              String sql_colour ="select distinct(sku_attribute_value2) from XXIBM_PRODUCT_SKU where sku_attribute_value2 is not null";
+         	 con = dataSource.getConnection();
+              System.out.println("Database connection obtained : " + con) ;
+              prstmt=con.prepareStatement(sql_colour);
+              rs = prstmt.executeQuery();
+              while(rs.next()){
+                  
+             	 uniqueCommodity_colour.add(rs.getString("sku_attribute_value2"));
+  			}
+              con.close();
+              prstmt.close();
+              rs.close();
+              
+              String sql_size ="select distinct(sku_attribute_value1) from XXIBM_PRODUCT_SKU where sku_attribute_value1 is not null";
+         	 con = dataSource.getConnection();
+              System.out.println("Database connection obtained : " + con) ;
+              prstmt=con.prepareStatement(sql_size);
+              rs = prstmt.executeQuery();
+              while(rs.next()){
+                  
+             	 uniqueCommodity_size.add(rs.getString("sku_attribute_value1"));
+  			}
+         	
+              con.close();
+              prstmt.close();
+              rs.close();
+         	
+              String sql_brand ="select distinct(brand) from XXIBM_PRODUCT_STYLE";
+         	 con = dataSource.getConnection();
+              System.out.println("Database connection obtained : " + con) ;
+              prstmt=con.prepareStatement(sql_brand);
+              rs = prstmt.executeQuery();
+              while(rs.next()){
+                  
+             	 uniqueCommodity_brand.add(rs.getString("brand"));
+  			}
+         	
+              con.close();
+              prstmt.close();
+              rs.close();
+              
+              
+
+        	 String[] arrOfStr = filter.split("-"); 
+        	  
+             for (String var : arrOfStr)
+             {
+            	 if(null!=var)
+                 {
+                	 if(uniqueCommodity_colour.contains(var))
+                	 {
+                		 queryPart_color=" and psk.sku_attribute_value2 =  '"+var+"'";
+                	 }
+                	 else if(uniqueCommodity_size.contains(var))
+                	 {
+                		 queryPart_size=" and psk.sku_attribute_value1 = '"+var+"'";
+                	 }
+                	 else if(uniqueCommodity_brand.contains(var))
+                	 {
+                		 queryPart_brand=" and pst.brand = '"+var+"'";
+                	 }
+                 }
+             }
+             
+        	  String sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
+              		+ "pp.discount,pp.in_stock,psk.description," + 
+              		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand " + 
+              		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
+              		"XXIBM_PRODUCT_PRICING pp, XXIBM_PRODUCT_STYLE pst where pc.commodity=psk.catalogue_category and " + 
+              		"psk.item_number=pp.item_number and pc.commodity=pst.catalogue_category and psk.style_item=pst.item_number "
+              		+ queryPart_color + queryPart_size + queryPart_brand;
+              
+              con = dataSource.getConnection();
+              System.out.println("Database connection obtained : " + con) ;
+              prstmt=con.prepareStatement(sql1);
+              
+              rs1 = prstmt.executeQuery();
+              while(rs1.next()){
+            	  ProductCommodity productCommodity = new ProductCommodity() ;
+                  productCommodity.setCommodity(rs1.getString("commodity"));
+                  productCommodity.setCommodityName(rs1.getString("commodity_name"));
+                  productCommodity.setClassID(rs1.getString("class"));
+                  productCommodity.setClassName(rs1.getString("class_name"));
+                  productCommodity.setFamily(rs1.getString("family"));
+                  productCommodity.setFamilyName(rs1.getString("family_name"));
+                  productCommodity.setCommodityColour(rs1.getString("sku_attribute_value2"));
+                  productCommodity.setCommodityPrice(rs1.getString("list_price"));
+                  productCommodity.setCommoditySize(rs1.getString("sku_attribute_value1"));
+                  productCommodity.setCommodityDiscount(rs1.getString("discount"));
+                  productCommodity.setCommodityDescription(rs1.getString("description"));
+                  productCommodity.setCommodityInStock(rs1.getString("in_stock"));
+                  entities.add(productCommodity);
+                  }
+                      
+              
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	if(null!=prstmt)
+                {
+            	prstmt.close();
+                }
+            	if(null!=con)
+                {
+                con.close();
+                }
+                if(null!=rs)
+                {
+                	rs.close();
+                }
+                if(null!=rs1)
+                {
+                rs1.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
+    
+    
+    
 }
