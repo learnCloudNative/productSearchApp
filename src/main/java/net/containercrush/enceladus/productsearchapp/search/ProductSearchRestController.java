@@ -1193,7 +1193,7 @@ public class ProductSearchRestController {
         	 {
         		 sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
                    		+ "pp.discount,pp.in_stock,psk.description,psk.item_number," + 
-                   		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand, " + 
+                   		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand " + 
                    		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
                    		"XXIBM_PRODUCT_PRICING pp, XXIBM_PRODUCT_STYLE pst where pc.commodity=psk.catalogue_category and " + 
                    		"psk.item_number=pp.item_number and pc.commodity=pst.catalogue_category and psk.style_item=pst.item_number "
