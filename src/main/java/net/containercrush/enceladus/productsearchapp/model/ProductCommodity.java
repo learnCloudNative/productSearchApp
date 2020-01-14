@@ -17,7 +17,7 @@ public class ProductCommodity {
    private String commodityDiscount ;
    private String commodityInStock ;
    private String commodityBrand ;
-   
+   private String itemNumber;
    
 public String getCommodity() {
 	return commodity;
@@ -103,7 +103,14 @@ public String getCommodityBrand() {
 public void setCommodityBrand(String commodityBrand) {
 	this.commodityBrand = commodityBrand;
 }
-  
+public String getItemNumber() {
+	return itemNumber;
+}
+public void setItemNumber(String itemNumber) {
+	this.itemNumber = itemNumber;
+}
+ 
+
    
    
    

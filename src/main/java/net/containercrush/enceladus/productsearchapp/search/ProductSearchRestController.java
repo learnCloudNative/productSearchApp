@@ -1010,7 +1010,7 @@ public class ProductSearchRestController {
              }
              
         	  String sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
-              		+ "pp.discount,pp.in_stock,psk.description," + 
+              		+ "pp.discount,pp.in_stock,psk.description,psk.item_number," + 
               		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand " + 
               		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
               		"XXIBM_PRODUCT_PRICING pp, XXIBM_PRODUCT_STYLE pst where pc.commodity=psk.catalogue_category and " + 
@@ -1037,6 +1037,7 @@ public class ProductSearchRestController {
                   productCommodity.setCommodityDescription(rs1.getString("description"));
                   productCommodity.setCommodityInStock(rs1.getString("in_stock"));
                   productCommodity.setCommodityBrand(rs1.getString("brand"));
+                  productCommodity.setItemNumber(rs1.getString("item_number"));
                   entities.add(productCommodity);
                   }
                       
@@ -1191,8 +1192,8 @@ public class ProductSearchRestController {
         	 if(arr.size()>0)
         	 {
         		 sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
-                   		+ "pp.discount,pp.in_stock,psk.description," + 
-                   		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand " + 
+                   		+ "pp.discount,pp.in_stock,psk.description,psk.item_number," + 
+                   		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand, " + 
                    		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
                    		"XXIBM_PRODUCT_PRICING pp, XXIBM_PRODUCT_STYLE pst where pc.commodity=psk.catalogue_category and " + 
                    		"psk.item_number=pp.item_number and pc.commodity=pst.catalogue_category and psk.style_item=pst.item_number "
@@ -1202,7 +1203,7 @@ public class ProductSearchRestController {
         	 else
         	 {
         		 sql1 = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price,"
-                   		+ "pp.discount,pp.in_stock,psk.description," + 
+                   		+ "pp.discount,pp.in_stock,psk.description,psk.item_number," + 
                    		"psk.sku_attribute_value1,psk.sku_attribute_value2,pst.brand " + 
                    		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
                    		"XXIBM_PRODUCT_PRICING pp, XXIBM_PRODUCT_STYLE pst where pc.commodity=psk.catalogue_category and " + 
@@ -1230,6 +1231,7 @@ public class ProductSearchRestController {
                   productCommodity.setCommodityDescription(rs.getString("description"));
                   productCommodity.setCommodityInStock(rs.getString("in_stock"));
                   productCommodity.setCommodityBrand(rs.getString("brand"));
+                  productCommodity.setItemNumber(rs.getString("item_number"));
                   entities.add(productCommodity);
                   }
                       
@@ -1292,6 +1294,7 @@ public class ProductSearchRestController {
                       productCommodity.setCommodityDiscount("NA");
                       productCommodity.setCommodityDescription("NA");
                       productCommodity.setCommodityInStock("NA");
+                      productCommodity.setItemNumber("NA");
                       productCommodity.setTeamName("Enceladus") ;
                       entities.add(productCommodity);
 
