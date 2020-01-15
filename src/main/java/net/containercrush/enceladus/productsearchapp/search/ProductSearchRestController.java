@@ -51,7 +51,7 @@ public class ProductSearchRestController {
         try {
         	Properties p = new Properties();
         	p.setProperty("item", searchString);
-        	p.store(new FileWriter("search.properties"),"");
+        	p.store(new FileWriter("/data/search.properties"),"");
   
 	} catch (Exception e) {
             e.printStackTrace(); 
@@ -87,7 +87,7 @@ public class ProductSearchRestController {
 
         try {
         	Properties p = new Properties();
-        	p.load(new FileReader("search.properties"));
+        	p.load(new FileReader("/data/search.properties"));
         	String returnSearch=p.getProperty("item");
         	entities.put("item",returnSearch);
         		
