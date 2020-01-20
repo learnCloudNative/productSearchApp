@@ -1409,4 +1409,87 @@ public class ProductSearchRestController {
         return new ResponseEntity<Object>(entities, HttpStatus.OK);
     }
     
+    
+    
+
+    @GetMapping(path = "/commodities/getItems", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getItems() {
+        // Get data from service layer into entityList.
+
+        List<ProductCommodity> entities = new ArrayList<ProductCommodity>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Commodities by Class ID...") ;
+        System.out.println("Received Request for Product Commodities by Class ID (yes it refreshed image)...") ;
+
+        Connection con = null ;
+        PreparedStatement prstmt = null;
+        ResultSet rs=null;
+        try {
+
+            String sql = "select  pc.commodity_name, pc.commodity,pc.class,pc.class_name,pc.family,pc.family_name,pp.list_price," + 
+            		"pp.discount,pp.in_stock,psk.description,psk.item_number," + 
+            		"psk.sku_attribute_value1,psk.sku_attribute_value2 " + 
+            		"from XXIBM_PRODUCT_CATALOGUE pc, XXIBM_PRODUCT_SKU psk," + 
+            		"XXIBM_PRODUCT_PRICING pp where pc.commodity=psk.catalogue_category and " + 
+            		"psk.item_number=pp.item_number; ";
+            con = dataSource.getConnection();
+            System.out.println("Database connection obtained : " + con) ;
+            //stmt = con.createStatement();
+            prstmt=con.prepareStatement(sql);
+            rs = prstmt.executeQuery();
+            while(rs.next()){
+                
+            	ProductCommodity productCommodity = new ProductCommodity() ;
+                productCommodity.setCommodity(rs.getString("commodity"));
+                productCommodity.setCommodityName(rs.getString("commodity_name"));
+                productCommodity.setClassID(rs.getString("class"));
+                productCommodity.setClassName(rs.getString("class_name"));
+                productCommodity.setFamily(rs.getString("family"));
+                productCommodity.setFamilyName(rs.getString("family_name"));
+                productCommodity.setFamily(rs.getString("family"));
+                productCommodity.setFamilyName(rs.getString("family_name"));
+                productCommodity.setCommodityColour(rs.getString("sku_attribute_value2"));
+                productCommodity.setCommodityPrice(rs.getString("list_price"));
+                productCommodity.setCommoditySize(rs.getString("sku_attribute_value1"));
+                productCommodity.setCommodityDiscount(rs.getString("discount"));
+                productCommodity.setCommodityDescription(rs.getString("description"));
+                productCommodity.setCommodityInStock(rs.getString("in_stock"));
+                productCommodity.setItemNumber(rs.getString("item_number"));
+                entities.add(productCommodity);
+
+
+			}
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+            	if(null!=prstmt)
+                {
+            	prstmt.close();
+                }
+            	if(null!=con)
+                {
+                con.close();
+                }
+                if(null!=rs)
+                {
+                	rs.close();
+                }
+                
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
 }
