@@ -1,5 +1,7 @@
 package net.containercrush.enceladus.productsearchapp.search;
 
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
+
 
 import javax.sql.DataSource;
 
@@ -33,6 +37,79 @@ public class ProductSearchRestController {
 
     @Autowired
     DataSource dataSource;
+	
+    @GetMapping(path = "/uiSearchPOST/{searchString}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> uiSearchPOST(@PathVariable String searchString) {
+        // Get data from service layer into entityList.
+
+        List<String> entities = new ArrayList<String>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Families...") ;
+        System.out.println("Received Request for Product Families (yes it refreshed image)...") ;
+	    
+        try {
+        	Properties p = new Properties();
+        	p.setProperty("item", searchString);
+        	p.store(new FileWriter("/data/search.properties"),"");
+  
+	} catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+                
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
+    
+
+    @GetMapping(path = "/uiSearchGET/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> uiSearchGET() {
+        // Get data from service layer into entityList.
+
+    	 HashMap<String, String> entities 
+         = new HashMap<>();
+
+        System.out.println("Connection Polling datasource : " + dataSource); // check connection pooling
+        System.out.println("Received Request for Product Families...") ;
+        System.out.println("Received Request for Product Families (yes it refreshed image)...") ;
+
+
+        try {
+        	Properties p = new Properties();
+        	p.load(new FileReader("/data/search.properties"));
+        	String returnSearch=p.getProperty("item");
+        	entities.put("item",returnSearch);
+        		
+
+        } catch (Exception e) {
+            e.printStackTrace(); 
+
+        } finally {
+
+            try {
+                
+            } catch (Exception e) {
+                e.printStackTrace(); 
+
+            }
+           
+
+        }
+
+       
+        return new ResponseEntity<Object>(entities, HttpStatus.OK);
+    }
 
     @GetMapping(path = "/hello", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> sayHello() {
